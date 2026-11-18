@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F2F0FB">
+<title>Podio - califica a los equipos</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2' y='11' width='6' height='11' rx='2' fill='%23B9AEFF'/%3E%3Crect x='9' y='4' width='6' height='18' rx='2' fill='%235B3DF5'/%3E%3Crect x='16' y='14' width='6' height='8' rx='2' fill='%23FFC83D'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F0FB; --surface:#FFFFFF; --ink:#1C1A33; --ink-2:#5E5B7A; --line:#E2DEF3;
+  --brand:#5B3DF5; --brand-ink:#FFFFFF; --brand-soft:#E9E5FF; --brand-mid:#B9AEFF;
+  --sun:#FFC83D; --sun-soft:#FFF1C9; --silver:#CBCEE3; --bronze:#F2B48C;
+  --mint:#14B894; --mint-soft:#D8F5EC; --rose:#D9363E; --rose-soft:#FDE7E8;
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --text:"Figtree","Avenir Next","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--text);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:10px}
+[hidden]{display:none!important}
+
+.page{max-width:520px;margin:0 auto;padding:18px 18px 110px}
+.page.wide{max-width:900px}
+.top{display:flex;align-items:center;justify-content:space-between;height:44px;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:8px;font:700 1.25rem/1 var(--display);letter-spacing:-.02em}
+.foot{margin-top:40px;text-align:center}
+.foot a{color:var(--ink-2);font-size:.9rem;text-decoration:none;border-bottom:1px solid var(--line)}
+.foot a:hover{color:var(--brand);border-color:var(--brand)}
+
+h1{font:700 clamp(1.9rem,7vw,2.6rem)/1.04 var(--display);letter-spacing:-.025em;margin:0 0 10px}
+h2{font:650 1.05rem/1.2 var(--display);letter-spacing:-.01em;margin:26px 0 10px}
+.lead{color:var(--ink-2);margin:0 0 24px;max-width:46ch}
+.small-note{color:var(--ink-2);font-size:.88rem}
+.loading{color:var(--ink-2);padding:30px 0}
+
+/* paneles y formularios */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px}
+.panel + .panel{margin-top:14px}
+label{display:block;font-weight:600;font-size:.95rem;margin:0 0 16px}
+label:last-of-type{margin-bottom:0}
+input[type=text],input[type=password],select,textarea{display:block;width:100%;margin-top:7px;padding:13px 14px;background:#FBFAFF;border:1.5px solid var(--line);border-radius:14px;font-weight:400;transition:border-color .15s,background .15s}
+input[type=text]:focus,input[type=password]:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand);background:#fff}
+select{appearance:none;-webkit-appearance:none;padding-right:40px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235E5B7A' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+select:disabled{opacity:.55}
+.err{color:var(--rose);background:var(--rose-soft);border-radius:12px;padding:10px 12px;margin:14px 0 0;font-size:.93rem;font-weight:500}
+.notice{background:var(--sun-soft);border-radius:12px;padding:10px 12px;margin:0 0 16px;font-size:.93rem}
+
+/* botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:12px 20px;font-weight:650;cursor:pointer;background:var(--brand-soft);color:var(--brand);transition:transform .08s,background .15s,opacity .15s}
+.btn:hover{background:#DDD6FF}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--brand);color:var(--brand-ink)}
+.btn.primary:hover{background:#4B2EE0}
+.btn.ghost{background:transparent;color:var(--ink-2);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn.ghost:hover{background:#fff;color:var(--ink)}
+.btn.danger{background:var(--rose-soft);color:var(--rose)}
+.btn.danger.armed{background:var(--rose);color:#fff}
+.btn.small{padding:8px 14px;font-size:.88rem}
+.btn.block{width:100%;margin-top:20px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.linkbtn{background:none;border:0;padding:6px 0;color:var(--ink-2);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin-bottom:14px}
+.linkbtn:hover{color:var(--brand)}
+
+/* escalera de posiciones (lo memorable) */
+.ladder{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px}
+.slot{display:flex;align-items:center;gap:12px;min-height:64px;padding:8px 10px 8px 8px;border-radius:18px;border:1.5px dashed var(--line);background:transparent;color:var(--ink-2)}
+.slot .pos{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:14px;font:700 1.45rem/1 var(--display);background:var(--brand-soft);color:var(--brand);opacity:.55}
+.slot .ph{font-size:.92rem}
+.slot.filled{border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.slot.fresh{animation:land .22s ease-out}
+.slot.filled .pos{opacity:1}
+.slot.m1 .pos{background:var(--sun);color:#4A3600}
+.slot.m2 .pos{background:var(--silver);color:#2D2F4A}
+.slot.m3 .pos{background:var(--bronze);color:#4F2A0E}
+.slot .nm{flex:1;min-width:0;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.slot .ctl{display:flex;gap:2px}
+.icon{width:36px;height:36px;display:grid;place-items:center;border:0;border-radius:11px;background:transparent;color:var(--ink-2);cursor:pointer}
+.icon:hover{background:var(--brand-soft);color:var(--brand)}
+.icon:disabled{opacity:.25;cursor:default;background:transparent}
+.icon.x:hover{background:var(--rose-soft);color:var(--rose)}
+@keyframes land{from{transform:translateY(-6px);opacity:.4}to{transform:none;opacity:1}}
+
+.pool{display:flex;flex-wrap:wrap;gap:8px}
+.pill{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:11px 14px;font-weight:600;text-align:left;cursor:pointer;line-height:1.25;transition:border-color .15s,transform .08s}
+.pill:hover{border-color:var(--brand)}
+.pill:active{transform:scale(.97)}
+
+.dock{position:fixed;left:0;right:0;bottom:0;padding:14px 18px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 70%,rgba(242,240,251,0))}
+.dock-in{max-width:520px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.dock .count{font:650 .95rem var(--display);color:var(--ink-2);white-space:nowrap}
+.dock .btn{flex:1;margin:0}
+
+/* listo */
+.done{text-align:left;padding-top:20px}
+.check{width:64px;height:64px;border-radius:50%;background:var(--mint-soft);color:var(--mint);display:grid;place-items:center;margin-bottom:20px}
+
+/* profesor */
+.headrow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.headrow .lead{margin:0}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 18px;flex-wrap:wrap}
+.row + .row{border-top:1px solid var(--line)}
+.row-title{font:650 1.12rem/1.2 var(--display);letter-spacing:-.01em;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.row-sub{color:var(--ink-2);font-size:.9rem;margin-top:3px}
+.row-actions{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font:600 .75rem/1 var(--text);padding:5px 9px;border-radius:999px;background:var(--mint-soft);color:#0B7A62}
+.tag.closed{background:#ECEAF5;color:var(--ink-2)}
+.empty{text-align:center;padding:42px 20px;color:var(--ink-2)}
+.empty b{display:block;color:var(--ink);font:650 1.1rem var(--display);margin-bottom:4px}
+
+.trow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.trow .tn{flex:none;width:26px;text-align:center;font:700 .95rem var(--display);color:var(--ink-2)}
+.trow input{margin-top:0}
+.pasteBox{margin-top:12px}
+.pasteBox textarea{min-height:120px;resize:vertical}
+.rowbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.switch{display:flex;gap:14px;align-items:flex-start;margin:0 0 14px;cursor:pointer;font-weight:400}
+.switch input{position:absolute;opacity:0;pointer-events:none}
+.switch .knob{flex:none;position:relative;width:46px;height:28px;border-radius:999px;background:#D5D1EA;transition:background .15s;margin-top:2px}
+.switch .knob::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .18s}
+.switch input:checked + .knob{background:var(--brand)}
+.switch input:checked + .knob::after{transform:translateX(18px)}
+.switch input:focus-visible + .knob{outline:3px solid var(--brand);outline-offset:2px}
+.switch b{display:block;font-weight:650}
+.switch small{color:var(--ink-2);font-size:.88rem}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+/* resultados */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 6px}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:26px 0 8px}
+.pod{flex:1;max-width:190px;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;min-width:0}
+.pod-name{font-weight:650;font-size:.9rem;line-height:1.2;text-align:center;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.pod-block{border-radius:18px 18px 8px 8px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:12px 6px 10px}
+.pod-n{font:800 2.4rem/1 var(--display)}
+.pod-s{font:600 .85rem var(--text);opacity:.8}
+.p1 .pod-block{height:160px;background:var(--sun);color:#4A3600}
+.p2 .pod-block{height:118px;background:var(--silver);color:#2D2F4A}
+.p3 .pod-block{height:88px;background:var(--bronze);color:#4F2A0E}
+.rk{display:grid;grid-template-columns:38px 1fr;gap:4px 12px;align-items:center;padding:14px 0}
+.rk + .rk{border-top:1px solid var(--line)}
+.rk .n{font:700 1.3rem/1 var(--display);color:var(--ink-2);text-align:center}
+.rk .t{font-weight:650;line-height:1.25;overflow-wrap:anywhere}
+.rk .meter{grid-column:2;display:flex;align-items:center;gap:10px}
+.bar{flex:1;height:10px;border-radius:999px;background:#ECEAF5;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--brand-mid),var(--brand))}
+.rk.first .bar i{background:linear-gradient(90deg,#FFE08A,var(--sun))}
+.rk .sc{font:700 1.05rem var(--display);min-width:34px;text-align:right}
+.rk .facts{grid-column:2;color:var(--ink-2);font-size:.82rem;display:flex;gap:6px 12px;flex-wrap:wrap}
+.rk .facts span{white-space:nowrap}
+details.votes{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:4px 18px}
+details.votes summary{cursor:pointer;padding:14px 0;font:650 1rem var(--display)}
+.vrow{padding:12px 0;border-top:1px solid var(--line);display:flex;gap:12px;justify-content:space-between;align-items:flex-start}
+.vrow .who{font-weight:650}
+.vrow .meta{color:var(--ink-2);font-size:.88rem;margin-top:2px;line-height:1.35}
+.vrow .meta ol{margin:6px 0 0;padding-left:20px}
+
+.toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-weight:600;font-size:.92rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:480px){
+  .row-actions .btn{padding:9px 14px;font-size:.88rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+const SB_URL = 'https://nzrfxgwakdzgqaelaowa.supabase.co';
+const SB_KEY = 'sb_publishable_IgmP91XaE7wH7sJqklsWnQ_PGJ64Ivc';
+
+/* ---------- utilidades ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const app = $('#app');
+let timer = null;
+const clearTimer = () => { if (timer) { clearInterval(timer); timer = null; } };
+const paint = html => { app.innerHTML = html; window.scrollTo(0, 0); };
+function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('on'), 2200); }
+const setErr = (id, msg) => { const e = $('#' + id); if (!e) return; e.textContent = msg || ''; e.hidden = !msg; };
+
+async function rpc(fn, args){
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {method:'POST', headers:{'apikey':SB_KEY, 'Content-Type':'application/json'}, body: JSON.stringify(args || {})});
+  const t = await r.text(); let j; try { j = JSON.parse(t); } catch { j = t; }
+  if (!r.ok) throw new Error((j && j.message) || t || 'Error de conexión');
+  return j;
+}
+
+const LOGO = `<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="2" y="11" width="6" height="11" rx="2" fill="#B9AEFF"/><rect x="9" y="4" width="6" height="18" rx="2" fill="#5B3DF5"/><rect x="16" y="14" width="6" height="8" rx="2" fill="#FFC83D"/></svg>`;
+const I = {
+  up:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg>`,
+  down:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`,
+  x:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>`,
+  back:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>`,
+  check:`<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>`
+};
+
+function shell(inner, {admin = false, wide = false} = {}){
+  return `<div class="page ${wide ? 'wide' : ''}">
+    <header class="top"><div class="brand">${LOGO}<span>Podio</span></div>${admin && A.pass ? '<button class="btn ghost small" id="logout">Salir</button>' : ''}</header>
+    <main>${inner}</main>
+    ${admin ? '' : '<footer class="foot"><a href="#profesor">Soy profesor</a></footer>'}
+  </div>`;
+}
+const NET = 'No se pudo conectar. Revisa tu internet e intenta de nuevo.';
+
+/* botón de dos pasos para acciones que borran */
+function arm(btn, label, fn){
+  let armed = false, t; const old = btn.textContent;
+  btn.onclick = async () => {
+    if (!armed) { armed = true; btn.textContent = label; btn.classList.add('armed'); t = setTimeout(() => { armed = false; btn.textContent = old; btn.classList.remove('armed'); }, 4000); return; }
+    clearTimeout(t); armed = false; btn.classList.remove('armed'); btn.textContent = old; await fn();
+  };
+}
+async function copyText(txt){
+  try { await navigator.clipboard.writeText(txt); return true; }
+  catch { const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand('copy'); } catch {} ta.remove(); return ok; }
+}
+const groupLink = id => location.href.split('#')[0] + '#g-' + id;
+
+/* =====================================================
+   ESTUDIANTE
+   ===================================================== */
+const S = {groups:[], group:null, name:'', team:'', order:[], pre:null, fresh:-1};
+
+async function studentHome(){
+  paint(shell('<div class="loading">Cargando grupos…</div>'));
+  try {
+    S.groups = await rpc('rk_list_groups');
+    if (S.pre) {
+      const g = await rpc('rk_get_group', {p_group: S.pre});
+      if (g && g.ok) { S.group = g; if (g.is_open && !S.groups.some(x => x.id === g.id)) S.groups.push({id: g.id, name: g.name}); }
+      S.pre = null;
+    }
+  } catch (e) {
+    paint(shell(`<h1>Califica a tus compañeros</h1><p class="err">${NET}</p><button class="btn primary block" id="retry">Reintentar</button>`));
+    $('#retry').onclick = studentHome; return;
+  }
+  drawStudentForm();
+}
+
+function teamSelectHtml(){
+  const g = S.group;
+  if (!g) return `<label>Tu equipo<select id="equipo" disabled><option>Primero elige un grupo</option></select></label>`;
+  return `<label>Tu equipo<select id="equipo"><option value="">Elige tu equipo</option>
+    ${g.teams.map(t => `<option value="${t.id}" ${String(S.team) === String(t.id) ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}
+    <option value="none" ${S.team === 'none' ? 'selected' : ''}>No estoy en ninguno de estos equipos</option></select></label>`;
+}
+
+function drawStudentForm(){
+  const closed = S.group && !S.group.is_open;
+  paint(shell(`
+    <h1>Califica a tus compañeros</h1>
+    <p class="lead">Elige tu grupo y ordena a los equipos del mejor al peor.</p>
+    <form class="panel" id="f" novalidate>
+      <label>Grupo<select id="grupo"><option value="">Elige un grupo</option>
+        ${S.groups.map(g => `<option value="${g.id}" ${S.group && S.group.id === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}</select></label>
+      ${S.groups.length ? '' : '<p class="notice">Todavía no hay grupos abiertos. Pídele a tu profesor el link directo.</p>'}
+      <div id="closed">${closed ? '<p class="notice">Este grupo ya cerró la votación.</p>' : ''}</div>
+      <label>Tu nombre<input type="text" id="nombre" autocomplete="name" placeholder="Nombre y apellido" value="${esc(S.name)}"></label>
+      <div id="teamwrap">${teamSelectHtml()}</div>
+      <p class="err" id="err" hidden></p>
+      <button class="btn primary block" id="go" ${closed ? 'disabled' : ''}>Ordenar equipos</button>
+    </form>`));
+  $('#nombre').oninput = e => { S.name = e.target.value; };
+  $('#teamwrap').onchange = e => { if (e.target.id === 'equipo') S.team = e.target.value; };
+  $('#grupo').onchange = async e => {
+    const id = e.target.value; S.team = ''; setErr('err', '');
+    if (!id) { S.group = null; drawStudentForm(); return; }
+    try { const g = await rpc('rk_get_group', {p_group: +id}); S.group = g && g.ok ? g : null; }
+    catch { S.group = null; setErr('err', NET); return; }
+    drawStudentForm();
+  };
+  $('#f').onsubmit = async ev => {
+    ev.preventDefault();
+    const name = S.name.replace(/\s+/g, ' ').trim();
+    if (!S.group) return setErr('err', 'Elige el grupo al que perteneces.');
+    if (name.length < 3) return setErr('err', 'Escribe tu nombre y apellido.');
+    if (!S.team) return setErr('err', 'Elige tu equipo, o "No estoy en ninguno" si no estás en ninguno.');
+    setErr('err', '');
+    const b = $('#go'); b.disabled = true; b.textContent = 'Verificando…';
+    try {
+      const dup = await rpc('rk_check_name', {p_group: S.group.id, p_name: name});
+      if (dup === true) { b.disabled = false; b.textContent = 'Ordenar equipos'; return setErr('err', 'Ese nombre ya envió su calificación en este grupo. Si fue un error, pídele al profesor que la borre.'); }
+    } catch { b.disabled = false; b.textContent = 'Ordenar equipos'; return setErr('err', NET); }
+    S.name = name; S.order = [];
+    drawRank();
+  };
+}
+
+function poolTeams(){
+  const g = S.group, mine = S.team === 'none' ? null : +S.team;
+  return g.teams.filter(t => !(g.exclude_own && mine && t.id === mine));
+}
+
+function drawRank(){
+  const pool = poolTeams(), K = pool.length, byId = Object.fromEntries(pool.map(t => [t.id, t]));
+  const left = pool.filter(t => !S.order.includes(t.id));
+  const medal = i => i < 3 ? ' m' + (i + 1) : '';
+  const slots = [];
+  for (let i = 0; i < K; i++) {
+    const id = S.order[i];
+    if (id !== undefined) {
+      slots.push(`<li class="slot filled${medal(i)}${i === S.fresh ? ' fresh' : ''}"><span class="pos">${i + 1}</span><span class="nm">${esc(byId[id].name)}</span>
+        <span class="ctl"><button class="icon" data-a="up" data-i="${i}" aria-label="Subir" ${i === 0 ? 'disabled' : ''}>${I.up}</button>
+        <button class="icon" data-a="down" data-i="${i}" aria-label="Bajar" ${i === S.order.length - 1 ? 'disabled' : ''}>${I.down}</button>
+        <button class="icon x" data-a="x" data-i="${i}" aria-label="Quitar">${I.x}</button></span></li>`);
+    } else {
+      slots.push(`<li class="slot"><span class="pos">${i + 1}</span>${i === S.order.length ? '<span class="ph">Toca un equipo para ubicarlo aquí</span>' : ''}</li>`);
+    }
+  }
+  const mineName = S.team !== 'none' ? (S.group.teams.find(t => t.id === +S.team) || {}).name : null;
+  const hint = (S.group.exclude_own && mineName) ? `Tu equipo, ${esc(mineName)}, no aparece en la lista.` : 'Toca primero al mejor equipo, luego al siguiente.';
+  paint(shell(`
+    <button class="linkbtn" id="back">${I.back} Cambiar mis datos</button>
+    <h1>Ordena a los equipos</h1>
+    <p class="lead">${S.group.exclude_own && mineName ? 'Toca primero al mejor, luego al siguiente. ' + hint : hint}</p>
+    <ol class="ladder">${slots.join('')}</ol>
+    ${left.length ? `<h2>Por ordenar</h2><div class="pool">${left.map(t => `<button class="pill" data-id="${t.id}">${esc(t.name)}</button>`).join('')}</div>` : ''}
+    <p class="err" id="err" hidden></p>
+    <div class="dock"><div class="dock-in"><span class="count">${S.order.length} de ${K}</span>
+      <button class="btn primary" id="send" ${S.order.length === K ? '' : 'disabled'}>Enviar calificación</button></div></div>`));
+  $('#back').onclick = drawStudentForm;
+  $$('.pill').forEach(b => b.onclick = () => { S.order.push(+b.dataset.id); S.fresh = S.order.length - 1; drawRank(); });
+  S.fresh = -1;
+  $$('.slot .icon').forEach(b => b.onclick = () => {
+    const i = +b.dataset.i, a = b.dataset.a;
+    if (a === 'x') S.order.splice(i, 1);
+    else if (a === 'up') [S.order[i - 1], S.order[i]] = [S.order[i], S.order[i - 1]];
+    else [S.order[i + 1], S.order[i]] = [S.order[i], S.order[i + 1]];
+    drawRank();
+  });
+  $('#send').onclick = sendVote;
+}
+
+async function sendVote(){
+  const b = $('#send'); b.disabled = true; b.textContent = 'Enviando…'; setErr('err', '');
+  try {
+    const r = await rpc('rk_submit_vote', {p_group: S.group.id, p_name: S.name, p_team: S.team === 'none' ? null : +S.team, p_ranking: S.order});
+    if (r && r.ok) return drawDone();
+    const m = {duplicate:'Ese nombre ya envió su calificación en este grupo.', cerrado:'El profesor cerró la votación de este grupo.',
+      ranking:'La lista de equipos cambió mientras votabas. Vuelve a empezar.', equipo:'Tu equipo ya no existe en este grupo. Vuelve a empezar.', grupo:'Este grupo ya no existe.'};
+    setErr('err', m[r && r.error] || 'No se pudo guardar tu calificación.');
+  } catch { setErr('err', NET); }
+  b.disabled = false; b.textContent = 'Enviar calificación';
+}
+
+function drawDone(){
+  paint(shell(`<div class="done"><div class="check">${I.check}</div>
+    <h1>Listo, ${esc(S.name.split(' ')[0])}.</h1>
+    <p class="lead">Tu calificación de ${esc(S.group.name)} quedó registrada. Ya puedes cerrar esta página.</p></div>`));
+  S.order = []; S.team = ''; S.name = ''; S.group = null;
+}
+
+/* =====================================================
+   PROFESOR
+   ===================================================== */
+const A = {pass: '', groups: []};
+try { A.pass = sessionStorage.getItem('podio_pass') || ''; } catch {}
+const savePass = p => { A.pass = p; try { p ? sessionStorage.setItem('podio_pass', p) : sessionStorage.removeItem('podio_pass'); } catch {} };
+
+function adminPaint(inner, wide = true){
+  paint(shell(inner, {admin: true, wide}));
+  const lo = $('#logout'); if (lo) lo.onclick = () => { savePass(''); location.hash = ''; };
+}
+
+async function adminEntry(){
+  if (!A.pass) return adminLogin();
+  return adminDashboard();
+}
+
+function adminLogin(msg){
+  paint(shell(`
+    <h1>Panel del profesor</h1>
+    <p class="lead">Aquí creas los grupos y ves los resultados.</p>
+    <form class="panel" id="lf"><label>Clave<input type="password" id="clave" autocomplete="current-password"></label>
+      <p class="err" id="err" ${msg ? '' : 'hidden'}>${esc(msg || '')}</p>
+      <button class="btn primary block" id="enter">Entrar</button></form>`, {admin: true, wide: false}));
+  $('#clave').focus();
+  $('#lf').onsubmit = async e => {
+    e.preventDefault(); const b = $('#enter'); b.disabled = true; setErr('err', '');
+    try {
+      const ok = await rpc('rk_admin_check', {p_pass: $('#clave').value});
+      if (ok === true) { savePass($('#clave').value); return adminDashboard(); }
+      setErr('err', 'Clave incorrecta.');
+    } catch { setErr('err', NET); }
+    b.disabled = false;
+  };
+}
+
+async function loadGroups(){
+  const r = await rpc('rk_admin_groups', {p_pass: A.pass});
+  if (!r || !r.ok) { savePass(''); adminLogin('Tu sesión expiró. Escribe la clave de nuevo.'); return false; }
+  A.groups = r.groups; return true;
+}
+
+async function adminDashboard(){
+  clearTimer();
+  adminPaint('<div class="loading">Cargando…</div>');
+  try { if (!(await loadGroups())) return; } catch { adminPaint(`<p class="err">${NET}</p><button class="btn primary" id="retry">Reintentar</button>`); $('#retry').onclick = adminDashboard; return; }
+  const rows = A.groups.map(g => `<div class="row">
+      <div><div class="row-title">${esc(g.name)} <span class="tag ${g.is_open ? '' : 'closed'}">${g.is_open ? 'Abierto' : 'Cerrado'}</span></div>
+        <div class="row-sub">${g.teams.length} equipos, ${g.votes} ${g.votes === 1 ? 'voto' : 'votos'}</div></div>
+      <div class="row-actions"><button class="btn small" data-a="res" data-id="${g.id}">Resultados</button>
+        <button class="btn ghost small" data-a="edit" data-id="${g.id}">Editar</button>
+        <button class="btn ghost small" data-a="link" data-id="${g.id}">Copiar link</button></div></div>`).join('');
+  adminPaint(`
+    <div class="headrow"><div><h1>Tus grupos</h1><p class="lead">Cada grupo tiene su lista de equipos, su link y sus resultados.</p></div>
+      <button class="btn primary" id="new">Nuevo grupo</button></div>
+    ${A.groups.length ? `<div class="list">${rows}</div>
+      <p class="small-note" style="margin-top:14px">Los estudiantes también pueden entrar al link general y elegir su grupo de la lista: <b>${esc(location.href.split('#')[0])}</b></p>`
+      : '<div class="list"><div class="empty"><b>Aún no tienes grupos</b>Crea el primero para generar su link.</div></div>'}`);
+  $('#new').onclick = () => adminEditor(null);
+  $$('.row-actions .btn').forEach(b => b.onclick = async () => {
+    const g = A.groups.find(x => x.id === +b.dataset.id), a = b.dataset.a;
+    if (a === 'res') adminResults(g.id);
+    else if (a === 'edit') adminEditor(g);
+    else { toast(await copyText(groupLink(g.id)) ? 'Link copiado' : 'No se pudo copiar'); }
+  });
+}
+
+/* ---------- editor de grupo ---------- */
+let E = null;
+function adminEditor(g){
+  clearTimer();
+  E = g ? {id: g.id, name: g.name, exclude_own: g.exclude_own, is_open: g.is_open, teams: g.teams.map(t => ({id: t.id, name: t.name})), locked: g.votes > 0, votes: g.votes}
+        : {id: null, name: '', exclude_own: true, is_open: true, teams: [{name:''},{name:''},{name:''}], locked: false, votes: 0};
+  adminPaint(`
+    <button class="linkbtn" id="back">${I.back} Mis grupos</button>
+    <h1>${E.id ? 'Editar grupo' : 'Nuevo grupo'}</h1>
+    <p class="lead">${E.id ? '' : 'Ponle nombre y agrega los equipos que van a calificar.'}</p>
+    <div class="panel">
+      <label>Nombre del grupo<input type="text" id="gname" placeholder="Ej. Gestión de operaciones, sección 2" value="${esc(E.name)}" maxlength="80"></label>
+      <label style="margin-bottom:8px">Equipos</label>
+      ${E.locked ? `<p class="notice">Este grupo ya tiene ${E.votes} ${E.votes === 1 ? 'voto' : 'votos'}. Puedes renombrar y reordenar equipos, pero no agregar ni quitar. Para eso, borra primero los votos desde Resultados.</p>` : ''}
+      <div id="tl"></div>
+      <div class="rowbtns">
+        <button class="btn small" id="addt" ${E.locked ? 'disabled' : ''}>Agregar equipo</button>
+        <button class="btn ghost small" id="pastebtn" ${E.locked ? 'disabled' : ''}>Pegar una lista</button>
+      </div>
+      <div class="pasteBox" id="pastebox" hidden>
+        <textarea id="pastetxt" placeholder="Un equipo por línea. Los números del inicio se quitan solos."></textarea>
+        <div class="rowbtns"><button class="btn small" id="pasteok">Agregar a la lista</button></div>
+      </div>
+      <h2>Reglas</h2>
+      <label class="switch"><input type="checkbox" id="exo" ${E.exclude_own ? 'checked' : ''}><span class="knob"></span>
+        <span><b>Nadie califica a su propio equipo</b><small>Cada estudiante elige su equipo y no lo ve en la lista.</small></span></label>
+      <label class="switch"><input type="checkbox" id="opn" ${E.is_open ? 'checked' : ''}><span class="knob"></span>
+        <span><b>Votación abierta</b><small>Si la cierras, el grupo desaparece de la lista de los estudiantes.</small></span></label>
+      <p class="err" id="err" hidden></p>
+      <div class="actions"><button class="btn primary" id="save">Guardar grupo</button>
+        ${E.id ? '<button class="btn danger" id="del">Eliminar grupo</button>' : ''}</div>
+    </div>`);
+  drawTeamRows();
+  $('#back').onclick = adminDashboard;
+  $('#gname').oninput = e => { E.name = e.target.value; };
+  $('#exo').onchange = e => { E.exclude_own = e.target.checked; };
+  $('#opn').onchange = e => { E.is_open = e.target.checked; };
+  $('#addt').onclick = () => { E.teams.push({name:''}); drawTeamRows(true); };
+  $('#pastebtn').onclick = () => { $('#pastebox').hidden = !$('#pastebox').hidden; if (!$('#pastebox').hidden) $('#pastetxt').focus(); };
+  $('#pasteok').onclick = () => {
+    const lines = $('#pastetxt').value.split(/\r?\n/).map(s => s.replace(/^\s*\d+\s*[\.\)\-:]\s*/, '').trim()).filter(Boolean);
+    if (!lines.length) return;
+    E.teams = E.teams.filter(t => t.name.trim()).concat(lines.map(name => ({name})));
+    $('#pastetxt').value = ''; $('#pastebox').hidden = true; drawTeamRows();
+  };
+  $('#save').onclick = saveGroup;
+  if (E.id) arm($('#del'), '¿Seguro? Borra también sus votos', async () => {
+    try { await rpc('rk_admin_delete_group', {p_pass: A.pass, p_id: E.id}); toast('Grupo eliminado'); adminDashboard(); } catch { setErr('err', NET); }
+  });
+}
+
+function drawTeamRows(focusLast){
+  $('#tl').innerHTML = E.teams.map((t, i) => `<div class="trow"><span class="tn">${i + 1}</span>
+    <input type="text" data-i="${i}" value="${esc(t.name)}" placeholder="Nombre del equipo o de la persona" maxlength="100">
+    <button class="icon" data-a="up" data-i="${i}" aria-label="Subir" ${i === 0 ? 'disabled' : ''}>${I.up}</button>
+    <button class="icon" data-a="down" data-i="${i}" aria-label="Bajar" ${i === E.teams.length - 1 ? 'disabled' : ''}>${I.down}</button>
+    <button class="icon x" data-a="x" data-i="${i}" aria-label="Quitar" ${E.locked ? 'disabled' : ''}>${I.x}</button></div>`).join('');
+  $$('#tl input').forEach(inp => inp.oninput = e => { E.teams[+e.target.dataset.i].name = e.target.value; });
+  $$('#tl .icon').forEach(b => b.onclick = () => {
+    const i = +b.dataset.i, a = b.dataset.a;
+    if (a === 'x') E.teams.splice(i, 1);
+    else if (a === 'up') [E.teams[i - 1], E.teams[i]] = [E.teams[i], E.teams[i - 1]];
+    else [E.teams[i + 1], E.teams[i]] = [E.teams[i], E.teams[i + 1]];
+    drawTeamRows();
+  });
+  if (focusLast) { const all = $$('#tl input'); all[all.length - 1].focus(); }
+}
+
+async function saveGroup(){
+  const name = E.name.trim();
+  const teams = E.teams.filter(t => t.name.trim()).map(t => t.id ? {id: t.id, name: t.name.trim()} : {name: t.name.trim()});
+  if (!name) return setErr('err', 'Ponle un nombre al grupo.');
+  if (teams.length < 2) return setErr('err', 'Agrega al menos 2 equipos con nombre.');
+  setErr('err', '');
+  const b = $('#save'); b.disabled = true; b.textContent = 'Guardando…';
+  try {
+    const r = await rpc('rk_admin_save_group', {p_pass: A.pass, p_id: E.id, p_name: name, p_exclude_own: E.exclude_own, p_is_open: E.is_open, p_teams: teams});
+    if (r && r.ok) { toast('Grupo guardado'); return adminDashboard(); }
+    const m = {clave:'Tu sesión expiró. Entra de nuevo.', nombre:'Revisa el nombre del grupo.', equipos:'Necesitas entre 2 y 60 equipos con nombre.',
+      tiene_votos:'Este grupo ya tiene votos: solo puedes renombrar y reordenar equipos.', no_existe:'Este grupo ya no existe.'};
+    setErr('err', m[r && r.error] || 'No se pudo guardar.');
+  } catch { setErr('err', NET); }
+  b.disabled = false; b.textContent = 'Guardar grupo';
+}
+
+/* ---------- resultados ---------- */
+let R = null, detailsOpen = false;
+
+function computeStats(teams, votes){
+  const m = {}; teams.forEach(t => m[t.id] = {t, n: 0, sc: 0, pos: 0, firsts: 0});
+  votes.forEach(v => { const K = v.ranking.length; v.ranking.forEach((id, i) => {
+    const x = m[id]; if (!x) return; x.n++; x.pos += i + 1; x.sc += K > 1 ? (K - 1 - i) / (K - 1) * 100 : 100; if (i === 0) x.firsts++;
+  }); });
+  return Object.values(m).map(x => ({...x, avg: x.n ? x.sc / x.n : 0, avgPos: x.n ? x.pos / x.n : 0}))
+    .sort((a, b) => b.avg - a.avg || b.firsts - a.firsts || a.t.pos - b.t.pos);
+}
+const f1 = n => n.toFixed(1).replace('.', ',');
+
+async function fetchResults(id){
+  const r = await rpc('rk_admin_results', {p_pass: A.pass, p_group: id});
+  if (!r || !r.ok) { if (r && r.error === 'clave') { savePass(''); adminLogin('Tu sesión expiró. Escribe la clave de nuevo.'); } else adminDashboard(); return null; }
+  return r;
+}
+
+async function adminResults(id, silent){
+  clearTimer();
+  if (!silent) adminPaint('<div class="loading">Cargando resultados…</div>');
+  try { R = await fetchResults(id); } catch { if (!silent) adminPaint(`<p class="err">${NET}</p><button class="btn primary" id="retry">Reintentar</button>`), $('#retry').onclick = () => adminResults(id); return; }
+  if (!R) return;
+  const prev = $('details.votes'); if (prev) detailsOpen = prev.open;
+  drawResults();
+  timer = setInterval(() => adminResults(id, true), 20000);
+}
+
+function drawResults(){
+  const {group, teams, votes} = R, st = computeStats(teams, votes), nameOf = Object.fromEntries(teams.map(t => [t.id, t.name]));
+  const top = st.filter(x => x.n > 0).slice(0, 3);
+  const podium = top.length ? `<div class="podium">${[1, 0, 2].filter(i => top[i]).map(i => `<div class="pod p${i + 1}"><div class="pod-name">${esc(top[i].t.name)}</div>
+      <div class="pod-block"><span class="pod-n">${i + 1}</span><span class="pod-s">${Math.round(top[i].avg)} pts</span></div></div>`).join('')}</div>` : '';
+  const rows = st.map((x, i) => `<div class="rk ${i === 0 && x.n ? 'first' : ''}"><div class="n">${i + 1}</div><div class="t">${esc(x.t.name)}</div>
+      <div class="meter"><div class="bar"><i style="width:${x.avg.toFixed(1)}%"></i></div><div class="sc">${x.n ? Math.round(x.avg) : '-'}</div></div>
+      <div class="facts"><span>Lugar promedio ${x.n ? f1(x.avgPos) : '-'}</span><span>${x.firsts} ${x.firsts === 1 ? 'primer lugar' : 'primeros lugares'}</span><span>${x.n} ${x.n === 1 ? 'voto' : 'votos'}</span></div></div>`).join('');
+  const vrows = votes.slice().reverse().map(v => `<div class="vrow"><div><div class="who">${esc(v.name)}</div>
+      <div class="meta">${v.team_id ? 'Equipo: ' + esc(nameOf[v.team_id] || '-') : 'Sin equipo'}<ol>${v.ranking.map(id => `<li>${esc(nameOf[id] || '-')}</li>`).join('')}</ol></div></div>
+      <button class="btn danger small" data-v="${v.id}">Borrar</button></div>`).join('');
+  adminPaint(`
+    <button class="linkbtn" id="back">${I.back} Mis grupos</button>
+    <div class="headrow"><div><h1>${esc(group.name)}</h1>
+      <p class="lead" style="margin:0">${votes.length} ${votes.length === 1 ? 'voto' : 'votos'} <span class="tag ${group.is_open ? '' : 'closed'}" style="margin-left:6px">${group.is_open ? 'Abierto' : 'Cerrado'}</span></p></div></div>
+    <div class="toolbar">
+      <button class="btn small" id="refresh">Actualizar</button>
+      <button class="btn ghost small" id="csv">Descargar CSV</button>
+      <button class="btn ghost small" id="link">Copiar link</button>
+      <button class="btn ghost small" id="toggle">${group.is_open ? 'Cerrar votación' : 'Abrir votación'}</button>
+      <button class="btn ghost small" id="edit">Editar equipos</button>
+    </div>
+    ${votes.length ? podium : '<div class="empty"><b>Aún no hay votos</b>Comparte el link del grupo para empezar a recibirlos.</div>'}
+    <div class="panel" style="margin-top:14px"><h2 style="margin-top:0">Clasificación</h2>
+      <p class="small-note" style="margin:0 0 6px">Puntaje de 0 a 100: 100 si siempre lo ponen primero y 0 si siempre lo ponen último. Se actualiza solo cada 20 segundos.</p>${rows}</div>
+    <details class="votes" ${detailsOpen ? 'open' : ''}><summary>Votos individuales (${votes.length})</summary>
+      ${vrows || '<p class="small-note">Todavía no hay votos.</p>'}
+      ${votes.length ? '<div style="padding:10px 0 16px"><button class="btn danger small" id="clear">Borrar todos los votos</button></div>' : ''}</details>`);
+  $('#back').onclick = adminDashboard;
+  $('#refresh').onclick = () => adminResults(group.id);
+  $('#link').onclick = async () => toast(await copyText(groupLink(group.id)) ? 'Link copiado' : 'No se pudo copiar');
+  $('#csv').onclick = () => downloadCsv(group, teams, votes);
+  $('#toggle').onclick = async () => { try { await rpc('rk_admin_set_open', {p_pass: A.pass, p_group: group.id, p_open: !group.is_open}); toast(group.is_open ? 'Votación cerrada' : 'Votación abierta'); adminResults(group.id); } catch { toast(NET); } };
+  $('#edit').onclick = async () => { try { if (await loadGroups()) adminEditor(A.groups.find(g => g.id === group.id)); } catch { toast(NET); } };
+  $$('.vrow .btn').forEach(b => arm(b, '¿Seguro?', async () => { try { await rpc('rk_admin_delete_vote', {p_pass: A.pass, p_id: +b.dataset.v}); toast('Voto borrado'); detailsOpen = true; adminResults(group.id); } catch { toast(NET); } }));
+  const cl = $('#clear'); if (cl) arm(cl, '¿Seguro? No se puede deshacer', async () => { try { await rpc('rk_admin_clear_votes', {p_pass: A.pass, p_group: group.id}); toast('Votos borrados'); adminResults(group.id); } catch { toast(NET); } });
+}
+
+function downloadCsv(group, teams, votes){
+  const nameOf = Object.fromEntries(teams.map(t => [t.id, t.name])), q = s => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+  const maxK = Math.max(0, ...votes.map(v => v.ranking.length));
+  const head = ['votante', 'equipo', ...Array.from({length: maxK}, (_, i) => 'puesto_' + (i + 1)), 'fecha'];
+  const rows = votes.map(v => [q(v.name), q(v.team_id ? nameOf[v.team_id] : ''), ...Array.from({length: maxK}, (_, i) => q(v.ranking[i] ? nameOf[v.ranking[i]] : '')), q(v.created_at)]);
+  const csv = '﻿' + [head.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8'}));
+  a.download = (group.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'grupo') + '_votos.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* =====================================================
+   RUTAS
+   ===================================================== */
+function route(){
+  clearTimer();
+  const h = location.hash;
+  if (h === '#profesor') return adminEntry();
+  const m = h.match(/^#g-(\d+)$/);
+  S.pre = m ? +m[1] : null; S.group = null; S.team = ''; S.order = [];
+  studentHome();
+}
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>
